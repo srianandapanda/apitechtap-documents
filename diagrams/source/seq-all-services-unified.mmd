@@ -1,0 +1,83 @@
+sequenceDiagram
+  autonumber
+  actor U as User
+  participant UI as Web UI
+  participant K as Kong Gateway
+  participant AU as Auth Service
+  participant PR as Profile Service
+  participant AI as AI Assistance
+  participant PP as Plan and Payment
+  participant SQL as SQL shared cluster
+  participant MG as Mongo shared cluster
+  participant S3 as S3
+  participant PG as Payment Gateway
+  participant GPT as GPT API
+
+  Note over SQL: Same cluster different tables credentials users plans orders payments document_meta
+  Note over MG: Same cluster different collections user_details static_questions ai_session
+
+  Note over U,GPT: 1 Signup and profile
+  U->>UI: Sign up
+  UI->>K: POST /api/v1/auth/signup
+  K->>AU: forward
+  AU->>SQL: INSERT credentials table
+  AU->>PR: POST internal create user
+  PR->>SQL: INSERT users table
+  PR->>MG: INSERT user_details collection
+  PR-->>AU: 201
+  AU-->>UI: success
+
+  Note over U,GPT: 2 Login JWT
+  U->>UI: Log in
+  UI->>K: POST /api/v1/auth/login
+  K->>AU: forward
+  AU->>SQL: SELECT credentials table
+  AU-->>UI: JWT access token
+
+  Note over U,GPT: 3 Profile me
+  UI->>K: GET /api/v1/users/me JWT
+  K->>PR: forward
+  PR->>SQL: SELECT users table
+  PR->>MG: FIND user_details by user_id
+  PR-->>UI: profile JSON
+
+  Note over U,GPT: 4 Plans catalog
+  UI->>K: GET /api/v1/plans JWT
+  K->>PP: forward
+  PP->>SQL: SELECT plans table
+  PP-->>UI: plans list
+
+  Note over U,GPT: 5 Static questions by group
+  UI->>K: GET /api/v1/questions JWT
+  K->>AI: forward
+  AI->>MG: FIND static_questions by user group
+  AI-->>UI: questions
+
+  Note over U,GPT: 6 AI chat
+  UI->>K: POST /api/v1/ai/chat JWT
+  K->>AI: forward
+  AI->>GPT: completion request
+  GPT-->>AI: model text
+  AI->>MG: UPSERT ai_session collection
+  AI-->>UI: answer
+
+  Note over U,GPT: 7 Resume PDF presign parse
+  UI->>K: POST /api/v1/documents/upload-url JWT
+  K->>AI: forward
+  AI->>SQL: INSERT document_meta table PENDING
+  AI-->>UI: presigned URL documentId
+  UI->>S3: PUT resume PDF
+  AI->>AI: parse job reads S3
+  AI->>SQL: UPDATE document_meta READY plus JSON pointer
+
+  Note over U,GPT: 8 Order and pay
+  UI->>K: POST /api/v1/orders JWT
+  K->>PP: forward
+  PP->>SQL: INSERT orders table
+  PP->>PG: create checkout
+  PG-->>PP: pay session
+  PP-->>UI: checkout URL
+  PG->>K: POST webhook signed
+  K->>PP: forward
+  PP->>SQL: UPDATE orders INSERT payments tables
+  PP-->>PG: 200 OK

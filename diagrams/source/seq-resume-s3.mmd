@@ -1,0 +1,25 @@
+sequenceDiagram
+  autonumber
+  actor U as User
+  participant UI as UI
+  participant K as Kong
+  participant AI as AI Service
+  participant S3 as S3
+  participant SQL as SQL
+  participant W as Parse Worker
+
+  U->>UI: Upload resume
+  UI->>K: POST /api/v1/documents/upload-url JWT
+  K->>AI: forward
+  AI->>SQL: doc row PENDING
+  AI-->>UI: presigned URL + documentId
+  UI->>S3: PUT PDF file
+
+  AI->>W: queue parse
+  W->>S3: GET file
+  W->>SQL: READY + JSON
+
+  UI->>K: GET /api/v1/documents/id JWT
+  K->>AI: forward
+  AI->>SQL: read status JSON
+  AI-->>UI: parsed resume JSON

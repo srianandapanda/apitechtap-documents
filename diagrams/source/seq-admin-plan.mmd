@@ -1,0 +1,14 @@
+sequenceDiagram
+  autonumber
+  actor A as Admin
+  participant UI as UI
+  participant K as Kong
+  participant PAY as Plan Payment
+  participant SQL as SQL
+
+  A->>UI: Edit plan
+  UI->>K: PUT /api/v1/admin/plans/id JWT admin role
+  K->>PAY: forward
+  PAY->>SQL: update plan row
+  PAY-->>K: 200
+  K-->>UI: updated plan

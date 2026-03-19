@@ -1,0 +1,47 @@
+flowchart TB
+  subgraph External["Outside cluster"]
+    User((User))
+    Admin((Admin))
+    PayGW[[Payment Gateway]]
+    LLM[[LLM / GPT]]
+  end
+
+  subgraph K8s["Kubernetes"]
+    subgraph Edge["Edge"]
+      UI[Web UI]
+      Kong[Kong API Gateway]
+    end
+    subgraph MS["Microservices"]
+      AUTH[Auth Service]
+      PROF[User Profile]
+      AI[AI Assistance]
+      PAY[Plan and Payment]
+      WRK[Resume Worker]
+    end
+  end
+
+  subgraph Data["Storage"]
+    DB_SQL[(SQL)]
+    DB_MONGO[(MongoDB)]
+    S3[(S3 PDFs)]
+  end
+
+  User --> UI
+  Admin --> UI
+  UI --> Kong
+  Kong --> AUTH
+  Kong --> PROF
+  Kong --> AI
+  Kong --> PAY
+  AUTH --> DB_SQL
+  AUTH -.->|signup profile| PROF
+  PROF --> DB_SQL
+  PROF --> DB_MONGO
+  AI --> DB_MONGO
+  AI --> S3
+  AI --> LLM
+  AI -.-> WRK
+  WRK --> S3
+  WRK --> DB_SQL
+  PAY --> DB_SQL
+  PAY --> PayGW

@@ -1,0 +1,15 @@
+sequenceDiagram
+  autonumber
+  actor U as User
+  participant UI as UI
+  participant K as Kong
+  participant A as Auth Service
+  participant SQL as SQL DB
+
+  U->>UI: Login
+  UI->>K: POST /api/v1/auth/login
+  K->>A: forward
+  A->>SQL: verify user
+  A-->>K: 200 JWT access token
+  K-->>UI: JWT
+  Note over UI: Bearer on next API calls

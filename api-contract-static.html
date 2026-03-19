@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI TechTap Core - Full API Contract</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --card: #121a32;
+        --text: #e7ecff;
+        --muted: #a9b4d0;
+        --accent: #7aa2ff;
+        --ok: #34d399;
+        --warn: #f59e0b;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
+        background: radial-gradient(circle at top, #1a2450, var(--bg) 45%);
+        color: var(--text);
+        line-height: 1.55;
+      }
+      .container {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 28px 18px 56px;
+      }
+      .hero {
+        background: linear-gradient(135deg, #1a2450, #101936);
+        border: 1px solid #2a3970;
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 18px;
+      }
+      h1, h2, h3, h4 { margin: 0 0 10px; }
+      h1 { font-size: 30px; }
+      h2 { font-size: 22px; margin-top: 22px; }
+      h3 { font-size: 18px; margin-top: 16px; color: #d4deff; }
+      h4 { font-size: 15px; margin-top: 10px; color: #d4deff; }
+      p { color: var(--muted); margin: 8px 0; }
+      .pill {
+        display: inline-block;
+        border: 1px solid #3450a0;
+        background: #1a2a58;
+        color: #dbe5ff;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        margin-right: 8px;
+        margin-bottom: 8px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 14px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid #29365f;
+        border-radius: 14px;
+        padding: 16px;
+      }
+      .k { color: var(--text); font-weight: 600; }
+      code, pre {
+        font-family: Consolas, "Courier New", monospace;
+      }
+      pre {
+        background: #0f1730;
+        border: 1px solid #29365f;
+        border-radius: 10px;
+        padding: 12px;
+        overflow-x: auto;
+        color: #d9e3ff;
+        font-size: 13px;
+      }
+      ul { margin: 8px 0 8px 18px; padding: 0; color: var(--muted); }
+      li { margin: 6px 0; }
+      .endpoint {
+        border-left: 4px solid var(--accent);
+        padding: 10px 0 10px 12px;
+        margin: 10px 0;
+      }
+      .method {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        margin-right: 8px;
+        border: 1px solid #35519f;
+        background: #182857;
+      }
+      .status {
+        font-size: 12px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid #3a4e8e;
+        margin-right: 6px;
+      }
+      .s200 { color: var(--ok); border-color: #2f7a62; }
+      .s302, .s400, .s401, .s403, .s404, .s409, .s500 { color: var(--warn); border-color: #8a6630; }
+      .toc a {
+        color: #9dc0ff;
+        text-decoration: none;
+      }
+      .toc li { margin: 4px 0; }
+      .footer {
+        margin-top: 24px;
+        font-size: 12px;
+        color: #95a3c8;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <section class="hero">
+        <h1>AI TechTap Core - Full API Contract</h1>
+        <p>
+          End-to-end API product contract for the complete repository: Auth, User,
+          Plan Admin, Payments, and AI Career Advisor modules.
+        </p>
+        <span class="pill">OpenAPI 3.x</span>
+        <span class="pill">Spring Boot 3</span>
+        <span class="pill">Java 21</span>
+        <span class="pill">Version 1.0</span>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <h2>Product Purpose</h2>
+          <ul>
+            <li>Onboard users with email/phone or Google token.</li>
+            <li>Capture dynamic profile fields across user groups.</li>
+            <li>Support plan purchase and payment lifecycle.</li>
+            <li>Deliver AI-powered career conversation and suggestions.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h2>Base Access</h2>
+          <ul>
+            <li><span class="k">Base URL:</span> <code>http://localhost:8081</code></li>
+            <li><span class="k">Swagger UI:</span> <code>/swagger-ui/index.html</code></li>
+            <li><span class="k">OpenAPI JSON:</span> <code>/v3/api-docs</code></li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h2>Auth Rules</h2>
+          <ul>
+            <li><span class="k">Bearer JWT:</span> user, payments, AI APIs.</li>
+            <li><span class="k">Basic Auth:</span> plan admin create/update.</li>
+            <li><span class="k">Public:</span> auth APIs, payment callback/webhook, docs.</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="card toc" style="margin-top:14px;">
+        <h2>API Index</h2>
+        <ul>
+          <li><a href="#auth-apis">Auth APIs</a></li>
+          <li><a href="#user-apis">User APIs</a></li>
+          <li><a href="#plan-apis">Plan Admin APIs</a></li>
+          <li><a href="#payment-apis">Payment APIs</a></li>
+          <li><a href="#ai-apis">AI APIs</a></li>
+        </ul>
+      </section>
+
+      <section class="card" id="auth-apis" style="margin-top:14px;">
+        <h2>Auth APIs</h2>
+
+        <div class="endpoint">
+          <h3><span class="method">POST</span>/api/auth/signup</h3>
+          <p>Create user credential identity with email or phone plus password.</p>
+          <p><span class="status s200">200</span><span class="status s409">409</span><span class="status s500">500</span></p>
+          <h4>Request sample</h4>
+          <pre>{
+  "email": "priya.student@example.com",
+  "phone": "9876543210",
+  "password": "StrongPass@123"
+}</pre>
+          <h4>Success response sample</h4>
+          <pre>{
+  "userId": "4b40e5fd-4194-4f11-ac58-ea0ea24f640c",
+  "message": "User created successfully"
+}</pre>
+        </div>
+
+        <div class="endpoint">
+          <h3><span class="method">POST</span>/api/auth/login</h3>
+          <p>Login with email or mobile_number and password. Returns JWT token.</p>
+          <p><span class="status s200">200</span><span class="status s401">401</span></p>
+          <h4>Request sample</h4>
+          <pre>{
+  "email": "priya.student@example.com",
+  "password": "StrongPass@123"
+}</pre>
+          <h4>Success response sample</h4>
+          <pre>{
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "expiresIn": 3600
+}</pre>
+        </div>
+
+        <div class="endpoint">
+          <h3><span class="method">POST</span>/api/auth/logout</h3>
+          <p>Logout user by revoking bearer token from Authorization header.</p>
+          <p><span class="status s200">200</span></p>
+          <h4>Response sample</h4>
+          <pre>{ "message": "User logged out successfully" }</pre>
+        </div>
+
+        <div class="endpoint">
+          <h3><span class="method">POST</span>/api/auth/forgot-password</h3>
+          <p>Request password reset (no account enumeration). See <code>docs/API-CONTRACTS.md</code>. Implement with <code>password_reset_tokens</code> table.</p>
+          <p><span class="status s200">200</span></p>
+          <h4>Request sample</h4>
+          <pre>{ "email": "user@example.com" }</pre>
+        </div>
+
+        <div class="endpoint">
+          <h3><span class="method">POST</span>/api/auth/reset-password</h3>
+          <p>Set new password using one-time token from email/SMS.</p>
+          <p><span class="status s200">200</span><span class="status s400">400</span><span class="status s401">401</span></p>
+          <h4>Request sample</h4>
+          <pre>{ "token": "opaque-reset-token", "newPassword": "NewSecurePass@1" }</pre>
+        </div>
+
+        <p class="note" style="margin-top:12px;"><strong>Removed:</strong> Google signup is not supported for now.</p>
+      </section>
+
+      <section class="card" id="user-apis" style="margin-top:14px;">
+        <h2>User APIs</h2>
+
+        <div class="endpoint">
+          <h3><span class="method">GET</span>/api/users/{userId}</h3>
+          <p>Get current user profile. Path userId must match JWT user.</p>
+          <p><span class="status s200">200</span><span class="status s401">401</span><span class="status s403">403</span><span class="status s404">404</span></p>
+        </div>
+
+        <div class="endpoint">
+          <h3><span class="method">POST</span>/api/users (Dynamic)</h3>
+          <p>
+            <strong>With JWT:</strong> update user details only (dynamic profile). New accounts: use <code>POST /api/auth/signup</code> first.
+            Supports varied fields for students and professionals; additional keys are allowed.
+          </p>
+          <p><span class="status s200">200</span><span class="status s400">400</span><span class="status s409">409</span></p>
+          <h4>Student sample</h4>
+          <pre>{
+  "firstName": "Priya",
+  "lastName": "Sharma",
+  "dob": "2003-08-19",
+  "yearOfPassing": 2025,
+  "email": "priya.student@example.com",
+  "mobile": "9876543210",
+  "address": "Pune"
+}</pre>
+          <h4>Professional sample</h4>
+          <pre>{
+  "firstName": "Rahul",
+  "lastName": "Verma",
+  "email": "rahul.pro@example.com",
+  "mobile": "9998887776",
+  "experienceYears": 6,
+  "currentRole": "Software Engineer",
+  "skills": ["Java", "Spring Boot", "SQL"],
+  "address": "Bengaluru"
+}</pre>
+        </div>
+      </section>
+
+      <section class="card" id="plan-apis" style="margin-top:14px;">
+        <h2>Plan Admin APIs</h2>
+
+        <div class="endpoint">
+          <h3><span class="method">POST</span>/api/admin/plans</h3>
+          <p>Create plan. Basic auth required.</p>
+          <p><span class="status s200">200</span></p>
+        </div>
+
+        <div class="endpoint">
+          <h3><span class="method">PUT</span>/api/admin/plans/{id}</h3>
+          <p>Update existing plan by UUID. Basic auth required.</p>
+          <p><span class="status s200">200</span><span class="status s404">404</span></p>
+        </div>
+
+        <div class="endpoint">
+          <h3><span class="method">GET</span>/api/admin/plans/{id}</h3>
+          <p>Get plan by UUID.</p>
+          <p><span class="status s200">200</span><span class="status s404">404</span></p>
+        </div>
+
+        <div class="endpoint">
+          <h3><span class="method">GET</span>/api/admin/plans?planType=&amp;activeOnly=</h3>
+          <p>List plans. Supports optional filters: planType (FREE/PRO/ELITE), activeOnly (true/false).</p>
+          <p><span class="status s200">200</span></p>
+        </div>
+      </section>
+
+      <section class="card" id="payment-apis" style="margin-top:14px;">
+        <h2>Payment APIs</h2>
+
+        <div class="endpoint">
+          <h3><span class="method">POST</span>/api/payments/orders (Strict DTO)</h3>
+          <p>Create order for plan purchase. JWT required. userId is read from token.</p>
+          <p><span class="status s200">200</span><span class="status s400">400</span><span class="status s401">401</span><span class="status s500">500</span></p>
+          <h4>Request sample</h4>
+          <pre>{
+  "planId": "5c84a2be-4b0d-4a74-a34d-cf955ec1c2a3"
+}</pre>
+          <h4>Success response sample</h4>
+          <pre>{
+  "orderId": "5a3cd087-9d38-4665-b22f-bf868ce4d08b",
+  "gatewayOrderId": "order_Q2tfFq7piVnE2A",
+  "amount": 999.00,
+  "currency": "INR",
+  "status": "PENDING_PAYMENT"
+}</pre>
+        </div>
+
+        <div class="endpoint">
+          <h3><span class="method">GET</span>/api/payments/orders/{orderId}</h3>
+          <p>Get order details by order UUID. JWT required.</p>
+          <p><span class="status s200">200</span><span class="status s404">404</span></p>
+        </div>
+
+        <div class="endpoint">
+          <h3><span class="method">GET</span>/api/payments/orders</h3>
+          <p>Get current user order list. JWT required.</p>
+          <p><span class="status s200">200</span><span class="status s401">401</span></p>
+        </div>
+
+        <div class="endpoint">
+          <h3><span class="method">GET</span>/api/payments/callback/razorpay</h3>
+          <p>Public redirect callback endpoint. Requires query params <code>razorpay_payment_id</code> and <code>razorpay_order_id</code>.</p>
+          <p><span class="status s302">302</span><span class="status s400">400</span></p>
+        </div>
+
+        <div class="endpoint">
+          <h3><span class="method">POST</span>/api/payments/webhook/razorpay</h3>
+          <p>Public webhook endpoint for Razorpay events. Signature header: <code>X-Razorpay-Signature</code>.</p>
+          <p><span class="status s200">200</span><span class="status s400">400</span><span class="status s401">401</span></p>
+        </div>
+      </section>
+
+      <section class="card" id="ai-apis" style="margin-top:14px;">
+        <h2>AI APIs</h2>
+
+        <div class="endpoint">
+          <h3><span class="method">POST</span>/api/ai/chat (Dynamic)</h3>
+          <p>Career advisory conversation endpoint. Dynamic prompt/context payload allowed.</p>
+          <p><span class="status s200">200</span><span class="status s400">400</span><span class="status s401">401</span></p>
+          <h4>Request sample</h4>
+          <pre>{
+  "message": "I have 4 years of Java experience and want to move to AI. What should I learn first?",
+  "userType": "professional",
+  "targetRole": "AI Engineer",
+  "preferredTimelineMonths": "6"
+}</pre>
+        </div>
+
+        <div class="endpoint">
+          <h3><span class="method">GET</span>/api/ai/career-suggestions</h3>
+          <p>Fetch current user conversation summary and career suggestions. JWT required.</p>
+          <p><span class="status s200">200</span><span class="status s401">401</span></p>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:14px;">
+        <h2>Data Storage Assurance</h2>
+        <ul>
+          <li>Orders and payments are persisted in PostgreSQL tables: <code>orders</code>, <code>payments</code>.</li>
+          <li>Payment module uses JPA entities/repositories, not MongoDB documents.</li>
+        </ul>
+      </section>
+
+      <p class="footer">
+        Document owner: AI TechTap Core team<br />
+        Last updated: 2026-03-09
+      </p>
+    </main>
+  </body>
+</html>

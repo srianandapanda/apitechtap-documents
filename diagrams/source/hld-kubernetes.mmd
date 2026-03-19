@@ -1,0 +1,14 @@
+flowchart TB
+  subgraph NS["K8s namespace"]
+    ING[Ingress]
+    D_UI[Deploy UI]
+    D_K[Deploy Kong]
+    D_A[Deploy Auth]
+    D_P[Deploy Profile]
+    D_AI[Deploy AI]
+    D_PAY[Deploy PlanPay]
+    D_W[Deploy Worker]
+  end
+  Clients((Users)) --> ING
+  ING --> D_K
+  ING --> D_UI

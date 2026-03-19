@@ -1,0 +1,36 @@
+flowchart LR
+  subgraph L1["Layer 1"]
+    UI[UI]
+  end
+  subgraph L2["Layer 2"]
+    Kong[Kong]
+  end
+  subgraph L3["Layer 3 Services"]
+    A[Auth]
+    P[Profile]
+    I[AI Resume]
+    M[Plan Pay]
+  end
+  subgraph L4["Layer 4 Data"]
+    SQL[(SQL)]
+    MG[(Mongo)]
+    S3[(S3)]
+  end
+  subgraph L5["External"]
+    PG[Pay Provider]
+    GPT[GPT]
+  end
+  UI --> Kong
+  Kong --> A
+  Kong --> P
+  Kong --> I
+  Kong --> M
+  A --> SQL
+  A -.-> P
+  P --> SQL
+  P --> MG
+  I --> MG
+  I --> S3
+  I --> GPT
+  M --> SQL
+  M --> PG

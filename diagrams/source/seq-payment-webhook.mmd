@@ -1,0 +1,23 @@
+sequenceDiagram
+  autonumber
+  actor U as User
+  participant UI as UI
+  participant K as Kong
+  participant PAY as Plan Payment
+  participant SQL as SQL
+  participant PG as Pay Gateway
+
+  U->>UI: Buy plan
+  UI->>K: POST /api/v1/orders JWT
+  K->>PAY: forward
+  PAY->>SQL: order PENDING
+  PAY->>PG: create session
+  PG-->>PAY: pay URL
+  PAY-->>UI: orderId + checkout
+
+  Note over U,PG: User pays on provider site
+
+  PG->>K: POST /webhooks/payment signed
+  K->>PAY: verify
+  PAY->>SQL: order PAID payment row
+  PAY-->>PG: 200 OK

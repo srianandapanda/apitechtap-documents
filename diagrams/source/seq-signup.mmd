@@ -1,0 +1,19 @@
+sequenceDiagram
+  autonumber
+  actor U as User
+  participant UI as UI
+  participant K as Kong
+  participant A as Auth Service
+  participant P as Profile Service
+  participant SQL as SQL DB
+
+  U->>UI: Signup form
+  UI->>K: POST /api/v1/auth/signup
+  K->>A: forward
+  A->>SQL: save credentials
+  A->>P: POST /internal/users
+  P->>SQL: insert user row
+  P-->>A: 201
+  A-->>K: 201
+  K-->>UI: success
+  UI-->>U: redirect login

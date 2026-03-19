@@ -1,0 +1,39 @@
+sequenceDiagram
+  autonumber
+  actor U as User
+  participant UI as UI
+  participant K as Kong
+  participant PR as Profile
+  participant PL as Plan Pay
+  participant AI as AI Service
+  participant SQL as SQL
+  participant MG as Mongo
+  participant GPT as GPT API
+
+  Note over U,GPT: After login JWT on all calls below
+
+  U->>UI: Open dashboard
+  UI->>K: GET /api/v1/users/me JWT
+  K->>PR: forward
+  PR->>SQL: user core
+  PR->>MG: user_details
+  PR-->>UI: profile JSON
+
+  U->>UI: View plans
+  UI->>K: GET /api/v1/plans JWT
+  K->>PL: forward
+  PL->>SQL: plan catalog
+  PL-->>UI: plans
+
+  U->>UI: Static questions
+  UI->>K: GET /api/v1/questions JWT
+  K->>AI: forward
+  AI->>MG: by user group
+  AI-->>UI: questions
+
+  U->>UI: Ask AI
+  UI->>K: POST /api/v1/ai/chat JWT
+  K->>AI: forward
+  AI->>GPT: completion
+  AI->>MG: optional session
+  AI-->>UI: answer

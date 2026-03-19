@@ -1,0 +1,317 @@
+{
+  "info": {
+    "name": "Aitechtap Core API",
+    "description": "Local API collection for http://localhost:8081. Auth: most endpoints need JWT (Bearer token from /api/auth/login). Plan admin GET accepts JWT or Basic; plan admin POST/PUT require Basic auth only.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8081" },
+    { "key": "token", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "planId", "value": "" },
+    { "key": "orderId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"phone\": null,\n  \"password\": \"your-password\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/signup",
+            "description": "Signup + register user in one step (credentials + user_core + user_profiles). Returns userId and message."
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"mobile_number\": null,\n  \"password\": \"your-password\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Returns token and expiresIn. Use token as Bearer for other APIs."
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/api/auth/logout",
+            "description": "Revokes JWT. Send Bearer token in Authorization header."
+          }
+        },
+        {
+          "name": "Forgot password (contract — implement)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/forgot-password",
+            "description": "See docs/API-CONTRACTS.md. Endpoint may return 404 until implemented."
+          }
+        },
+        {
+          "name": "Reset password (contract — implement)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"<reset-token-from-email>\",\n  \"newPassword\": \"new-secure-password\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/reset-password",
+            "description": "See docs/API-CONTRACTS.md. Endpoint may return 404 until implemented."
+          }
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Get my profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/users/{{userId}}",
+            "description": "Get current user data. Path userId must match JWT (use {{userId}} from login/signup)."
+          }
+        },
+        {
+          "name": "Update my profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"updated@example.com\",\n  \"name\": \"My Name\",\n  \"phone\": \"+919876543210\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users",
+            "description": "Update user details only (JWT). Primary registration is POST /api/auth/signup."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Plan Admin",
+      "item": [
+        {
+          "name": "List plans (JWT or Basic)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/plans?planType=&activeOnly=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "plans"],
+              "query": [
+                { "key": "planType", "value": "", "description": "FREE, PRO, ELITE" },
+                { "key": "activeOnly", "value": "false" }
+              ]
+            },
+            "description": "GET accepts JWT or Basic auth. Query: planType (optional), activeOnly (optional)."
+          }
+        },
+        {
+          "name": "List plans (Basic auth)",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "planadmin" },
+                { "key": "password", "value": "change-me-in-production" }
+              ]
+            },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/admin/plans",
+            "description": "Same as list with Basic auth (app.plan.admin.username / password from properties)."
+          }
+        },
+        {
+          "name": "Get plan by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/admin/plans/{{planId}}",
+            "description": "GET by UUID. JWT or Basic."
+          }
+        },
+        {
+          "name": "Create plan (Basic only)",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "planadmin" },
+                { "key": "password", "value": "change-me-in-production" }
+              ]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planType\": \"PRO\",\n  \"price\": 19.99,\n  \"currency\": \"USD\",\n  \"isActive\": true,\n  \"metadata\": { \"description\": \"Pro plan\" },\n  \"actionCodes\": [\"RUN_TEST_SUITE\", \"STORE_PROFILE\"],\n  \"featureCodes\": [\"CAREER_GUIDANCE\"]\n}"
+            },
+            "url": "{{baseUrl}}/api/admin/plans",
+            "description": "POST/PUT require Basic auth only. planType: FREE, PRO, ELITE."
+          }
+        },
+        {
+          "name": "Update plan (Basic only)",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "planadmin" },
+                { "key": "password", "value": "change-me-in-production" }
+              ]
+            },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planType\": \"PRO\",\n  \"price\": 24.99,\n  \"currency\": \"USD\",\n  \"isActive\": true,\n  \"metadata\": {},\n  \"actionCodes\": [\"RUN_TEST_SUITE\", \"STORE_PROFILE\"],\n  \"featureCodes\": [\"CAREER_GUIDANCE\"]\n}"
+            },
+            "url": "{{baseUrl}}/api/admin/plans/{{planId}}",
+            "description": "Update existing plan by UUID. Basic auth only."
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI",
+      "item": [
+        {
+          "name": "Chat (start or continue)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"I want to explore tech careers\"\n}"
+            },
+            "url": "{{baseUrl}}/api/ai/chat",
+            "description": "No body or empty message = start conversation; with message = user reply. JWT required."
+          }
+        },
+        {
+          "name": "Chat (start – no message)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/api/ai/chat",
+            "description": "Start new AI conversation."
+          }
+        },
+        {
+          "name": "Get career suggestions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/ai/career-suggestions",
+            "description": "Returns conversation and AI career suggestions. JWT required."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Create order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"{{planId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/payments/orders",
+            "description": "Creates order and payment; returns gatewayOrderId, keyId, amount, returnUrls for checkout. JWT required."
+          }
+        },
+        {
+          "name": "My orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/payments/orders",
+            "description": "List orders for current user. JWT required."
+          }
+        },
+        {
+          "name": "Get order by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/payments/orders/{{orderId}}",
+            "description": "Get single order by UUID. JWT required."
+          }
+        },
+        {
+          "name": "Callback (redirect – browser)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/callback/razorpay?razorpay_payment_id=pay_xxx&razorpay_order_id=order_xxx",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "callback", "razorpay"],
+              "query": [
+                { "key": "razorpay_payment_id", "value": "pay_xxx" },
+                { "key": "razorpay_order_id", "value": "order_xxx" }
+              ]
+            },
+            "description": "Razorpay redirects here. No JWT. With mock gateway use mock_order_<ourOrderId> as razorpay_order_id and any pay_ id."
+          }
+        },
+        {
+          "name": "Webhook (Razorpay)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Razorpay-Signature", "value": "<signature>", "description": "HMAC of body; mock gateway accepts any" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"payment.captured\",\n  \"payload\": {\n    \"payment\": {\n      \"entity\": {\n        \"id\": \"pay_xxx\",\n        \"order_id\": \"order_xxx\"\n      }\n    }\n  }\n}"
+            },
+            "url": "{{baseUrl}}/api/payments/webhook/razorpay",
+            "description": "Webhook for payment.captured / payment.failed. Mock gateway accepts any signature."
+          }
+        }
+      ]
+    }
+  ]
+}
