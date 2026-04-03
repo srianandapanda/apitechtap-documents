@@ -10,6 +10,7 @@
 |----------|------------|
 | **[ARCHITECTURE-HLD.md](./ARCHITECTURE-HLD.md)** | **Master HLD** — diagrams (PNG), system scope, links to every other doc |
 | **[GETTING-STARTED.md](./GETTING-STARTED.md)** | Build, Spotless, tests, run app, Swagger URLs |
+| **[local/SETUP-WINDOWS.md](./local/SETUP-WINDOWS.md)** | **Windows local setup:** installs checklist, URLs, `docker-local.cmd` steps |
 | **[local/README.md](./local/README.md)** | **Local Docker:** all microservices + Postgres + Mongo (ports 8081–8084), scripts |
 
 ---

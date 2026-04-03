@@ -5,7 +5,9 @@
 
 ## Run all backend services locally (Docker)
 
-Use **[local/README.md](./local/README.md)** — one Compose file and **`scripts/docker-local.sh`** / **`scripts/docker-local.ps1`** (build, up, down, logs). Default HTTP ports: **8081** auth, **8082** user-management, **8083** assist, **8084** plan-payment; Postgres **5435**, Mongo **27018**.
+**Windows:** follow **[local/SETUP-WINDOWS.md](./local/SETUP-WINDOWS.md)** for installs, localhost URLs, and `docker-local.cmd` commands.
+
+Everyone else: use **[local/README.md](./local/README.md)** — one Compose file and **`scripts/docker-local.sh`** / **`scripts/docker-local.ps1`** (build, up, down, logs). Default HTTP ports: **8081** auth, **8082** user-management, **8083** assist, **8084** plan-payment; Postgres **5435**, Mongo **27018**.
 
 ---
 

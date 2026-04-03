@@ -1,5 +1,7 @@
 # Local Docker stack (all services)
 
+**Windows users:** start with **[SETUP-WINDOWS.md](./SETUP-WINDOWS.md)** (install checklist, all localhost URLs, copy-paste commands).
+
 Runs **auth-service**, **user-management**, **aitechtap-assist**, and **plan-payment-service** together with **Postgres** (one server, four databases) and **MongoDB** (for user-management). **aitechtap-core** is not part of this stack.
 
 ## Layout
