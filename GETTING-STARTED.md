@@ -3,7 +3,13 @@
 - [Spring Boot 3.x Reference](https://docs.spring.io/spring-boot/docs/current/reference/html/)
 - [Gradle Build Tool](https://docs.gradle.org)
 
-Run the application: `./gradlew :app:bootRun` (or open `AitechtapCoreApplication` in the `app` module).
+## Run all backend services locally (Docker)
+
+Use **[local/README.md](./local/README.md)** — one Compose file and **`scripts/docker-local.sh`** / **`scripts/docker-local.ps1`** (build, up, down, logs). Default HTTP ports: **8081** auth, **8082** user-management, **8083** assist, **8084** plan-payment; Postgres **5435**, Mongo **27018**.
+
+---
+
+Legacy monolith note: if you still use the old `aitechtap-core` Gradle app, run `./gradlew :app:bootRun` (or open `AitechtapCoreApplication` in the `app` module). Microservices use their own Gradle projects and the Docker stack above.
 
 ## Build, Spotless, and Tests
 

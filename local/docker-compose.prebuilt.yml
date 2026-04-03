@@ -1,0 +1,133 @@
+# Same stack as docker-compose.yml, but images copy host-built boot JARs only (no Gradle/Maven in Docker).
+# Requires Docker Compose v2.17+ (BuildKit additional_contexts) and jars under each repo's build/libs/.
+# Use: ../scripts/docker-local-prebuilt.* {jars|build|up|down|logs|ps}
+
+name: aitechtap-local
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "${POSTGRES_HOST_PORT:-5435}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init-databases.sql:/docker-entrypoint-initdb.d/01-init-databases.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "${MONGO_HOST_PORT:-27018}:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  auth-service:
+    build:
+      context: ../../auth-service
+      dockerfile: Dockerfile.prebuilt
+      additional_contexts:
+        bootjar: ../../auth-service/build/libs
+    environment:
+      SERVER_PORT: "8080"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/authdb
+      SPRING_DATASOURCE_USERNAME: authuser
+      SPRING_DATASOURCE_PASSWORD: authpass
+      JWT_SECRET: ${JWT_SECRET:-change-this-secret-key-change-this-secret-key}
+    ports:
+      - "${AUTH_HOST_PORT:-8081}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  user-management:
+    build:
+      context: ../../user-management
+      dockerfile: Dockerfile.prebuilt
+      additional_contexts:
+        bootjar: ../../user-management/build/libs
+    environment:
+      SERVER_PORT: "8080"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ums
+      SPRING_DATASOURCE_USERNAME: ums
+      SPRING_DATASOURCE_PASSWORD: ums
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/ums
+      AUTH_SERVICE_BASE_URL: http://auth-service:8080
+      JWT_SECRET: ${JWT_SECRET:-change-this-secret-key-change-this-secret-key}
+      USER_MANAGEMENT_INTERNAL_ENABLED: "true"
+      USER_MANAGEMENT_INTERNAL_USERNAME: ${USER_MANAGEMENT_INTERNAL_USERNAME:-internal}
+      USER_MANAGEMENT_INTERNAL_PASSWORD: ${USER_MANAGEMENT_INTERNAL_PASSWORD:-changeme-internal}
+    ports:
+      - "${USER_MANAGEMENT_HOST_PORT:-8082}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+
+  aitechtap-assist:
+    build:
+      context: ../../aitechtap-assist
+      dockerfile: Dockerfile.prebuilt
+      additional_contexts:
+        bootjar: ../../aitechtap-assist/build/libs
+    environment:
+      SERVER_PORT: "8080"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/assist
+      SPRING_DATASOURCE_USERNAME: assist
+      SPRING_DATASOURCE_PASSWORD: assist
+      JWT_SECRET: ${JWT_SECRET:-change-this-secret-key-change-this-secret-key}
+      USER_MANAGEMENT_BASE_URL: http://user-management:8080
+      USER_MANAGEMENT_INTERNAL_USERNAME: ${USER_MANAGEMENT_INTERNAL_USERNAME:-internal}
+      USER_MANAGEMENT_INTERNAL_PASSWORD: ${USER_MANAGEMENT_INTERNAL_PASSWORD:-changeme-internal}
+    ports:
+      - "${ASSIST_HOST_PORT:-8083}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      user-management:
+        condition: service_started
+
+  plan-payment-service:
+    build:
+      context: ../../plan-payment-service
+      dockerfile: Dockerfile.prebuilt
+      additional_contexts:
+        bootjar: ../../plan-payment-service/build/libs
+    environment:
+      SERVER_PORT: "8080"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/planpayment
+      SPRING_DATASOURCE_USERNAME: planpayment
+      SPRING_DATASOURCE_PASSWORD: planpayment
+      JWT_SECRET: ${JWT_SECRET:-change-this-secret-key-change-this-secret-key}
+      USER_MANAGEMENT_BASE_URL: http://user-management:8080
+      INTERNAL_PAYMENT_TO_PROFILE_USER: ${INTERNAL_PAYMENT_TO_PROFILE_USER:-internal}
+      INTERNAL_PAYMENT_TO_PROFILE_PASSWORD: ${INTERNAL_PAYMENT_TO_PROFILE_PASSWORD:-changeme-internal}
+      PLANPAYMENT_USER_MANAGEMENT_MOCK: ${PLANPAYMENT_USER_MANAGEMENT_MOCK:-false}
+    ports:
+      - "${PLAN_PAYMENT_HOST_PORT:-8084}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      user-management:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  mongo_data:
