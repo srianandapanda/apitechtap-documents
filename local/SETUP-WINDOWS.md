@@ -135,13 +135,9 @@ scripts\docker-local.cmd ps
 
 You want **postgres**, **mongo**, and all four Java services **Up** (postgres/mongo often show **healthy**).
 
-### 4.5 Logs (optional)
+### 4.5 Logs
 
-```bat
-scripts\docker-local.cmd logs
-```
-
-Add a service name to tail one service, e.g. `scripts\docker-local.cmd logs auth-service`.
+See **[section 9](#9-view-application-logs-for-each-service)** for tailing **all** logs or **one** service (Java apps, Postgres, Mongo).
 
 ### 4.6 Stop
 
@@ -212,7 +208,97 @@ More detail: **`local/README.md`**.
 
 ---
 
-## 9. Related docs
+## 9. View application logs for each service
+
+Run these from the **`aitechtap-docs`** folder (same as **`build`** / **`up`**). Logs are whatever the process prints to **stdout** in the container (Spring Boot lines, SQL errors, stack traces).
+
+### 9.1 All services at once (follow / tail)
+
+Stream logs from **every** container until you press **Ctrl+C**:
+
+```bat
+scripts\docker-local.cmd logs
+```
+
+This is the same as `docker compose logs -f` for the local stack.
+
+### 9.2 One service at a time (recommended)
+
+Pass the **Compose service name** (middle column below). Still follows live output until **Ctrl+C**:
+
+```bat
+scripts\docker-local.cmd logs auth-service
+scripts\docker-local.cmd logs user-management
+scripts\docker-local.cmd logs aitechtap-assist
+scripts\docker-local.cmd logs plan-payment-service
+scripts\docker-local.cmd logs postgres
+scripts\docker-local.cmd logs mongo
+```
+
+| Compose service name | What it is |
+|----------------------|------------|
+| `auth-service` | Auth Spring Boot app |
+| `user-management` | User management Spring Boot app |
+| `aitechtap-assist` | Assist Spring Boot app |
+| `plan-payment-service` | Plan / payment Spring Boot app |
+| `postgres` | Postgres database server |
+| `mongo` | MongoDB server |
+
+### 9.3 Last N lines only (no follow)
+
+Compose accepts extra flags after the service name. Examples from **`aitechtap-docs\local`**:
+
+```bat
+cd local
+docker compose --env-file .env -f docker-compose.yml logs --tail 200 auth-service
+docker compose --env-file .env -f docker-compose.yml logs --tail 100 postgres
+```
+
+Or stay in **`aitechtap-docs`** and use the script (forwarding works the same):
+
+```bat
+scripts\docker-local.cmd logs --tail 200 auth-service
+```
+
+### 9.4 Prebuilt stack (`-Prebuilt`)
+
+If you started the stack with **`scripts\docker-local.cmd -Prebuilt up`**, use **`-Prebuilt`** on logs too so the same Compose file is used:
+
+```bat
+scripts\docker-local.cmd -Prebuilt logs auth-service
+```
+
+### 9.5 PowerShell equivalent
+
+```powershell
+.\scripts\docker-local.ps1 logs user-management
+.\scripts\docker-local.ps1 -Prebuilt logs aitechtap-assist
+```
+
+### 9.6 Docker Desktop
+
+**Docker Desktop → Containers** → select a container → **Logs** tab. Names look like `aitechtap-local-auth-service-1` (project prefix + service + number).
+
+### 9.7 Raw `docker logs` (by container name)
+
+List running containers:
+
+```bat
+docker ps --format "table {{.Names}}\t{{.Status}}"
+```
+
+Then:
+
+```bat
+docker logs -f aitechtap-local-auth-service-1
+docker logs --tail 100 aitechtap-local-user-management-1
+```
+
+Replace the name with what **`docker ps`** shows for the service you care about.
+
+---
+
+## 10. Related docs
 
 | Doc | Content |
 |-----|---------|
